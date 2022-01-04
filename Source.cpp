@@ -26,6 +26,9 @@ glm::vec3 camPostion(0.f, 0.f, 1.f), worldUp(0.f, 1.f, 0.f), camFront(0.f, 0.f, 
 float fov = 90.f, nearPlane = 0.1f;
 
 
+// OBJECTS
+Texture* texture0, *texture1;
+
 Vertex vertices[] =
 {
 	// Position								// Color						// Texture					// Normals
@@ -45,7 +48,7 @@ unsigned nrOfIndices = sizeof(indices) / sizeof(GLuint);
 
 void processNormalKeys(unsigned char key, int x, int y)
 {
-	switch (key) 
+	switch (key)
 	{
 	case 'w':
 		position.z -= 0.01f;
@@ -80,21 +83,21 @@ void processNormalKeys(unsigned char key, int x, int y)
 void CreateVBO(void)
 {
 	/* VAO, VBO, EBO Buffers -> they are send to GPU memory all at once because data from
-	                            CPU -> GPU is send slow */
+								CPU -> GPU is send slow */
 
 
-	/* Vertex Array Objects -> stores VertexAttribPointers so you don't have to 
-							   bind and configure buffers every time we draw an object */
+								/* Vertex Array Objects -> stores VertexAttribPointers so you don't have to
+														   bind and configure buffers every time we draw an object */
 
-	// Generate VAO Buffer to its id and Bind it to the corresponding VertexArrayBuffer
+														   // Generate VAO Buffer to its id and Bind it to the corresponding VertexArrayBuffer
 	glCreateVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
 
 	/* Vertex Buffer Objects -> stores vertices, normals, textures, etc.
-	                           in the high speed memory of video card */
+							   in the high speed memory of video card */
 
-	// Generate VBO Buffer and Bind it to the corresponding ARRAY_BUFFER
+							   // Generate VBO Buffer and Bind it to the corresponding ARRAY_BUFFER
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	// Any calls on the GL_ARRAY_BUFFER -> configures VBO Buffer
@@ -145,78 +148,14 @@ void DestroyShaders(void)
 	glDeleteProgram(ProgramId);
 }
 
-void LoadTexture(void)
-{
-	// TEXTURE 1
-
-	// Generate and Bind Texture
-	glGenTextures(1, &TextureId);
-	glActiveTexture(0); // There are 16 texture units, use the first one (0 by default)
-	glBindTexture(GL_TEXTURE_2D, TextureId);
-
-	// Load Image
-	int image_Width, image_Height;
-	unsigned char* image = SOIL_load_image("Images/container.jpg", &image_Width, &image_Height, 0, SOIL_LOAD_RGBA);
-
-
-	// Set the texture wrapping/filtering options (on the currently bound texture object)
-	// Texture Wrapping -> can't cover entire surface on ox and oy, then repeat
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	/* Texture Filtering -> low resolution texture on large object (scale texture up or down)
-							pixely aspect -> NEAREST; smooth -> LINEAR */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	if (image)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_Width, image_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-		glGenerateMipmap(GL_TEXTURE_2D); // Generates different sizes of texture for different distances
-	}
-	else
-	{
-		std::cout << "ERROR::TEXTURE_LOADING_FAILED\n";
-		std::cout << SOIL_last_result() << '\n';
-		//exit(3);
-	}
-	// Free memory
-	SOIL_free_image_data(image);
-
-
-	// TEXTURE 2
-	glGenTextures(1, &SecondTextureId);
-	glBindTexture(GL_TEXTURE_2D, SecondTextureId);
-
-	image = SOIL_load_image("Images/pusheen2.png", &image_Width, &image_Height, 0, SOIL_LOAD_RGBA);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	if (image)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_Width, image_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "ERROR::TEXTURE_LOADING_FAILED\n";
-		std::cout << SOIL_last_result() << '\n';
-		//exit(3);
-	}
-	SOIL_free_image_data(image);
-}
-
 void Initialize(void)
 {
 	// INIT OBJECTS
 
 	CreateVBO();
 	CreateShaders();
-	LoadTexture();
+	texture0 = new Texture("Images/container.jpg", GL_TEXTURE_2D, 0);
+	texture1 = new Texture("Images/pusheen2.png", GL_TEXTURE_2D, 1);
 
 
 	// INIT GL FUNCTIONS
@@ -249,8 +188,8 @@ void Initialize(void)
 	// Specify the value of the uniform texture variables for the current program object
 	glUseProgram(ProgramId); // make sure we use our program(shader)
 	// Assign texture units
-	glUniform1i(glGetUniformLocation(ProgramId, "texture0"), 0);
-	glUniform1i(glGetUniformLocation(ProgramId, "texture1"), 1);
+	glUniform1i(glGetUniformLocation(ProgramId, "texture0"), texture0->getTextureUnit());
+	glUniform1i(glGetUniformLocation(ProgramId, "texture1"), texture1->getTextureUnit());
 
 	// Assign World Matrices
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
@@ -270,14 +209,12 @@ void RenderFunction(void)
 	// Depth Buffer -> if z value < current z value, don't render pixel
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	
+
 	// BIND
 
 	// Bind textures on corresponding texture units
-	glActiveTexture(GL_TEXTURE0); // texture unit 0
-	glBindTexture(GL_TEXTURE_2D, TextureId);
-	glActiveTexture(GL_TEXTURE1); // texture unit 1
-	glBindTexture(GL_TEXTURE_2D, SecondTextureId);
+	texture0->bind();
+	texture1->bind();
 	glBindVertexArray(VAO); // Bind VAO
 
 	glUseProgram(ProgramId); // Use Program (Shader)
@@ -299,7 +236,7 @@ void RenderFunction(void)
 
 
 	// DRAW
-	
+
 	//glPointSize(10.0);
 	//glDrawArrays(GL_TRIANGLES, 0, nrOfVertices);
 	glDrawElements(GL_TRIANGLES, nrOfIndices, GL_UNSIGNED_INT, 0);

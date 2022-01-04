@@ -1,6 +1,8 @@
 #pragma once
 
-#include <iostream>
+#include<iostream>
+#include<fstream>
+#include<string>
 
 // GLM provides math functions
 #include "glm/glm/glm.hpp"  
@@ -13,6 +15,7 @@
 
 
 #include "loadShaders.h"
+#include "Texture.h"
 
 struct Vertex
 {
