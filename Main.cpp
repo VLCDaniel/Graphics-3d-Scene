@@ -29,6 +29,7 @@ float fov = 90.f, nearPlane = 0.1f;
 // OBJECTS
 Texture* texture0, *texture1;
 Material* material0;
+Mesh* test;
 
 Vertex vertices[] =
 {
@@ -87,10 +88,10 @@ void CreateVBO(void)
 								CPU -> GPU is send slow */
 
 
-								/* Vertex Array Objects -> stores VertexAttribPointers so you don't have to
-														   bind and configure buffers every time we draw an object */
+	/* Vertex Array Objects -> stores VertexAttribPointers so you don't have to
+								bind and configure buffers every time we draw an object */
 
-														   // Generate VAO Buffer to its id and Bind it to the corresponding VertexArrayBuffer
+	// Generate VAO Buffer to its id and Bind it to the corresponding VertexArrayBuffer
 	glCreateVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
@@ -128,6 +129,8 @@ void CreateVBO(void)
 	// Normal
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
 	glEnableVertexAttribArray(3);
+
+	glBindVertexArray(0);
 }
 
 void DestroyVBO(void)
@@ -155,6 +158,10 @@ void Initialize(void)
 
 	CreateVBO();
 	CreateShaders();
+
+	// MODEL MESH
+	test = new Mesh(vertices, nrOfVertices, indices, nrOfIndices);
+
 	texture0 = new Texture("Images/container.jpg", GL_TEXTURE_2D, 0);
 	texture1 = new Texture("Images/pusheen2.png", GL_TEXTURE_2D, 1);
 	material0 = new Material(glm::vec3(0.1f), glm::vec3(1.f), glm::vec3(1.f), texture0->getTextureUnit(), texture1->getTextureUnit());
@@ -241,6 +248,8 @@ void RenderFunction(void)
 	//glPointSize(10.0);
 	//glDrawArrays(GL_TRIANGLES, 0, nrOfVertices);
 	glDrawElements(GL_TRIANGLES, nrOfIndices, GL_UNSIGNED_INT, 0);
+
+	test->render(ProgramId);
 
 
 	glutSwapBuffers(); // One buffer is shown, one buffer is drawn
