@@ -4,6 +4,9 @@
 GLint winWidth = 640, winHeight = 480;
 GLuint ProgramId, TextureId, SecondTextureId, VAO, VBO, EBO;
 
+// 4x4 matrix with 1 on the main diagonal for translations, rotations, scaling
+glm::mat4 ModelMatrix(1.0f); 
+
 Vertex vertices[] =
 {
 	// Position							// Color					    // Texture
@@ -173,16 +176,28 @@ void Initialize(void)
 	//glCullFace(GL_BACK);
 	//glFrontFace(GL_CCW);
 
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+	glEnable(GL_BLEND); // render images with different levels of transparency
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // factor values for blending
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // How polygons are drawn, try GL_LINE
+
 
 	// Specify the value of the uniform texture variables for the current program object
 	glUseProgram(ProgramId); // make sure we use our program(shader)
 	// Assign texture units
 	glUniform1i(glGetUniformLocation(ProgramId, "texture0"), 0);
 	glUniform1i(glGetUniformLocation(ProgramId, "texture1"), 1);
+
+
+	// Initial model position
+	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.f, 0.f, 0.f));
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3(1.f, 0.f, 0.f));
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3(0.f, 1.f, 0.f));
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3(0.f, 0.f, 1.f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.f));
+
+	glUseProgram(ProgramId);
+	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
+	glUseProgram(0); // Exit program
 }
 
 void RenderFunction(void)
@@ -204,6 +219,16 @@ void RenderFunction(void)
 
 	// Use Program (Shader)
 	glUseProgram(ProgramId);
+
+	// Update uniforms
+	// Translate, rotate, scale
+	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.f, 0.f, 0.f));
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.01f), glm::vec3(1.f, 0.f, 0.f)); // Ox
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.00f), glm::vec3(0.f, 1.f, 0.f)); // Oy
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.00f), glm::vec3(0.f, 0.f, 1.f)); // Oz
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.f, 1.f, 1.f));
+	// Update the uniform variable in the shader each frame after calculating the matrix
+	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 
 
 	// Draw
@@ -250,7 +275,7 @@ int main(int argc, char* argv[])
 
 	Initialize();
 	glutDisplayFunc(RenderFunction); // Redraw windows when change size, move window, key press, etc.
-	//glutIdleFunc(glutPostRedisplay); // When no events are happening -> redisplay window
+	glutIdleFunc(RenderFunction); // When no events are happening -> redisplay window
 	glutKeyboardFunc(processNormalKeys); // Key pressed -> processNormalKeys callback for the current window
 	//glutSpecialFunc(processSpecialKeys);
 	glutReshapeFunc(reshapeFcn); // When resize window -> callback reshapeFcn
