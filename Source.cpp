@@ -47,6 +47,30 @@ void processNormalKeys(unsigned char key, int x, int y)
 {
 	switch (key) 
 	{
+	case 'w':
+		position.z -= 0.01f;
+		break;
+	case 's':
+		position.z += 0.01f;
+		break;
+	case 'a':
+		position.x -= 0.01f;
+		break;
+	case 'd':
+		position.x += 0.01f;
+		break;
+	case 'q':
+		rotation.y -= 1.f;
+		break;
+	case 'e':
+		rotation.y += 1.f;
+		break;
+	case 'z':
+		scale += 0.1f;
+		break;
+	case 'x':
+		scale -= 0.1f;
+		break;
 	case 27: // Esc -> exit
 		glutLeaveMainLoop();
 		break;
@@ -249,13 +273,13 @@ void RenderFunction(void)
 	// UPDATE UNIFORMS
 
 	// Translate, rotate, scale
-	rotation.x += 0.01f;
+	//rotation.x += 0.01f;
 	ModelMatrix = glm::mat4(1.0f);
-	//ModelMatrix = glm::translate(ModelMatrix, position);
+	ModelMatrix = glm::translate(ModelMatrix, position);
 	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.x), glm::vec3(1.f, 0.f, 0.f)); // Ox
-	//ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f)); // Oy
-	//ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f)); // Oz
-	//ModelMatrix = glm::scale(ModelMatrix, scale);
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f)); // Oy
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f)); // Oz
+	ModelMatrix = glm::scale(ModelMatrix, scale);
 
 	// Update the uniform variable in the shader each frame after calculating the matrix
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
