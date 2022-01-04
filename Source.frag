@@ -38,7 +38,7 @@ vec3 calculateAmbient()
 vec3 calculateDiffuse()
 {
 	// normalised direction from the light source to the normal
-	lightDir = normalize(ex_Position - lightPos0);
+	lightDir = normalize(lightPos0 - ex_Position);
 	norm = normalize(ex_Normal); // make sure the normal is normalised
 
 	float diff = max(dot(norm, lightDir), 0.0); // get angle between lightDir and norm
@@ -49,7 +49,7 @@ vec3 calculateSpecular()
 {
 	float specularStrength = 0.7; // intensity value
 	vec3 viewDir = normalize(cameraPos - ex_Position); // view direction from camera to fragment
-	vec3 reflectDir = reflect(lightDir, norm); // reflect vector along the normal axis
+	vec3 reflectDir = reflect(-lightDir, norm); // reflect vector along the normal axis
 
 	// specular component, the higher the power, the higher the shininess value
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35);
