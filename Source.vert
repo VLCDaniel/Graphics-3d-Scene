@@ -13,7 +13,9 @@ out vec3 ex_Color;
 out vec2 ex_Texture;
 
 // Uniforms
-uniform mat4 ModelMatrix; // Matrix containing rotations, translations and scaling
+uniform mat4 ModelMatrix; // Local space -> World space transformations
+uniform mat4 ViewMatrix; // World space -> View space transformations
+uniform mat4 ProjectionMatrix; // View space -> Clip space transformations
 
 void main(void)
 {
@@ -21,6 +23,7 @@ void main(void)
     ex_Color = in_Color;
     ex_Texture = vec2(in_Texture.x, 1 - in_Texture.y); // Texture is flipped on Oy when read
 
-    gl_Position = ModelMatrix * vec4(in_Position, 1.0f); // Output of the Vertex Shader
+//    gl_Position = ModelMatrix * vec4(in_Position, 1.0f); // Output of the Vertex Shader
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(in_Position, 1.);
 } 
  

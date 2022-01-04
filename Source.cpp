@@ -1,11 +1,30 @@
 #include "Libs.h";
 
 
-GLint winWidth = 640, winHeight = 480;
+GLint winWidth = 800;
+GLint winHeight = 600;
 GLuint ProgramId, TextureId, SecondTextureId, VAO, VBO, EBO;
 
-// 4x4 matrix with 1 on the main diagonal for translations, rotations, scaling
-glm::mat4 ModelMatrix(1.0f); 
+// WORLD TRANSFORMATIONS
+
+/* Local space -> World space, transform objects with ModelMatrix
+				  and place them into their world (outside of -1,1 restriction) */
+glm::mat4 ModelMatrix(1.0f);
+glm::vec3 position(0.f), rotation(0.f), scale(1.f);
+
+/* World space -> View space, transform World-space coordinates with ViewMatrix to
+				  coordinates that are in front of the user view(camera perspective) */
+glm::mat4 ViewMatrix(1.0f);
+
+/* View space -> Clip space, project coordinates within a given range(frustum) back
+				 to the Normalized Device Coordinates (-1, 1) with ProjectionMatrix
+*/
+glm::mat4 ProjectionMatrix(1.0f);
+
+
+glm::vec3 camPostion(0.f, 0.f, 1.f), worldUp(0.f, 1.f, 0.f), camFront(0.f, 0.f, -1.f);
+float fov = 90.f, nearPlane = 0.1f;
+
 
 Vertex vertices[] =
 {
@@ -165,21 +184,34 @@ void LoadTexture(void)
 
 void Initialize(void)
 {
+	// INIT OBJECTS
+
 	CreateVBO();
 	CreateShaders();
 	LoadTexture();
+
+
+	// INIT GL FUNCTIONS
+
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f); // specify clear values for the color buffers
-
 	glEnable(GL_DEPTH_TEST);
-
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
 	//glFrontFace(GL_CCW);
-
 	glEnable(GL_BLEND); // render images with different levels of transparency
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // factor values for blending
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // How polygons are drawn, try GL_LINE
 
+
+	// INIT POSITIONS
+
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
+	ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)winWidth / (float)winHeight, 0.1f, 100.0f);
+	rotation.x = 0.01f;
+
+
+	// INIT UNIFORMS
 
 	// Specify the value of the uniform texture variables for the current program object
 	glUseProgram(ProgramId); // make sure we use our program(shader)
@@ -187,17 +219,12 @@ void Initialize(void)
 	glUniform1i(glGetUniformLocation(ProgramId, "texture0"), 0);
 	glUniform1i(glGetUniformLocation(ProgramId, "texture1"), 1);
 
-
-	// Initial model position
-	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.f, 0.f, 0.f));
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3(1.f, 0.f, 0.f));
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3(0.f, 1.f, 0.f));
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3(0.f, 0.f, 1.f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.f));
-
-	glUseProgram(ProgramId);
+	// Assign World Matrices
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
-	glUseProgram(0); // Exit program
+	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(ViewMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
+	
+	glUseProgram(0); // Exit shader program
 }
 
 void RenderFunction(void)
@@ -207,31 +234,35 @@ void RenderFunction(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	
+	// BIND
+
 	// Bind textures on corresponding texture units
 	glActiveTexture(GL_TEXTURE0); // texture unit 0
 	glBindTexture(GL_TEXTURE_2D, TextureId);
 	glActiveTexture(GL_TEXTURE1); // texture unit 1
 	glBindTexture(GL_TEXTURE_2D, SecondTextureId);
+	glBindVertexArray(VAO); // Bind VAO
 
-	// Bind VAO
-	glBindVertexArray(VAO);
+	glUseProgram(ProgramId); // Use Program (Shader)
 
 
-	// Use Program (Shader)
-	glUseProgram(ProgramId);
+	// UPDATE UNIFORMS
 
-	// Update uniforms
 	// Translate, rotate, scale
-	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.f, 0.f, 0.f));
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.01f), glm::vec3(1.f, 0.f, 0.f)); // Ox
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.00f), glm::vec3(0.f, 1.f, 0.f)); // Oy
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.00f), glm::vec3(0.f, 0.f, 1.f)); // Oz
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.f, 1.f, 1.f));
+	rotation.x += 0.01f;
+	ModelMatrix = glm::mat4(1.0f);
+	//ModelMatrix = glm::translate(ModelMatrix, position);
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.x), glm::vec3(1.f, 0.f, 0.f)); // Ox
+	//ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f)); // Oy
+	//ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f)); // Oz
+	//ModelMatrix = glm::scale(ModelMatrix, scale);
+
 	// Update the uniform variable in the shader each frame after calculating the matrix
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 
 
-	// Draw
+	// DRAW
+	
 	//glPointSize(10.0);
 	//glDrawArrays(GL_TRIANGLES, 0, nrOfVertices);
 	glDrawElements(GL_TRIANGLES, nrOfIndices, GL_UNSIGNED_INT, 0);
@@ -243,10 +274,15 @@ void RenderFunction(void)
 
 void reshapeFcn(GLint newWidth, GLint newHeight)
 {
+	// Resize Viewport, Width, Height
 	glViewport(0, 0, newWidth, newHeight);
 	winWidth = newWidth;
 	winHeight = newHeight;
-	//width = winWidth / 10, height = winHeight / 10;
+
+	// To maintain aspect ratio, recalculate ProjectionMatrix and send it to the shader
+	float width = winWidth / 10, height = winHeight / 10;
+	ProjectionMatrix = glm::perspective(glm::radians(45.0f), width / height, 0.1f, 100.0f);
+	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
 }
 
 void Cleanup(void)
@@ -275,7 +311,7 @@ int main(int argc, char* argv[])
 
 	Initialize();
 	glutDisplayFunc(RenderFunction); // Redraw windows when change size, move window, key press, etc.
-	glutIdleFunc(RenderFunction); // When no events are happening -> redisplay window
+	glutIdleFunc(glutPostRedisplay); // When no events are happening -> redisplay window
 	glutKeyboardFunc(processNormalKeys); // Key pressed -> processNormalKeys callback for the current window
 	//glutSpecialFunc(processSpecialKeys);
 	glutReshapeFunc(reshapeFcn); // When resize window -> callback reshapeFcn
