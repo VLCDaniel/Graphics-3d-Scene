@@ -20,42 +20,54 @@ in vec3 ex_Normal;
 // Output values
 out vec4 out_Color;
 
-// uniform = constant, each uniform has an id
+// Uniforms
 uniform Material material;
-
 uniform vec3 lightPos0;
 uniform vec3 cameraPos;
 
-vec3 lightColor = vec3(1.0, 1.0, 1.0); // white
+// Local Variables
+vec3 lightDir; // normalised direction from the light source to the normal
+vec3 norm;	   // normal 
+
+// Functions
+vec3 calculateAmbient()
+{
+	return material.ambient;
+}
+
+vec3 calculateDiffuse()
+{
+	// normalised direction from the light source to the normal
+	lightDir = normalize(ex_Position - lightPos0);
+	norm = normalize(ex_Normal); // make sure the normal is normalised
+
+	float diff = max(dot(norm, lightDir), 0.0); // get angle between lightDir and norm
+	return diff * material.diffuse; // return the diffuse component -> larger angle -> lower light
+}
+
+vec3 calculateSpecular()
+{
+	float specularStrength = 0.7; // intensity value
+	vec3 viewDir = normalize(cameraPos - ex_Position); // view direction from camera to fragment
+	vec3 reflectDir = reflect(lightDir, norm); // reflect vector along the normal axis
+
+	// specular component, the higher the power, the higher the shininess value
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35);
+	return (specularStrength * spec * material.specular);
+}
 
 void main(void)
 {
 	// PHONE LIGHTING
 
-	// Ambient light -> there is always a small amout of light
-	vec3 ambient = material.ambient;
+	// Ambient light -> basic light
+	vec3 ambient = calculateAmbient();
 
+	// Diffuse light -> light from source
+	vec3 diffuse = calculateDiffuse(); // get the diffuse component -> larger angle -> lower light
 
-	// Diffuse light -> gives objects brightness the closer the fragments
-	//					are aligned to the light rays
-
-	// normalised direction from the light source to the normal
-	vec3 lightDir = normalize(ex_Position - lightPos0);
-	vec3 norm = normalize(ex_Normal); // make sure the normal is normalised
-
-	float diff = max(dot(norm, lightDir), 0.0); // get angle between lightDir and norm
-	vec3 diffuse = diff * material.diffuse; // get the diffuse component -> larger angle -> lower light
-
-
-	// Specular light -> reflextion
-	float specularStrength = 0.7; // intensity value
-
-	vec3 viewDir = normalize(cameraPos - ex_Position); // view direction from camera to fragment
-	vec3 reflectDir = reflect(lightDir, norm); // reflect vector along the normal axis
-
-	 // specular component, the higher the power, the higher the shininess value
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35);
-	vec3 specular = specularStrength * spec * material.specular;
+	// Specular light -> reflection
+	vec3 specular = calculateSpecular();
 
 	// Final Light
 	out_Color =
