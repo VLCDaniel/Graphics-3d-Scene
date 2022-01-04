@@ -28,11 +28,11 @@ float fov = 90.f, nearPlane = 0.1f;
 
 Vertex vertices[] =
 {
-	// Position							// Color					    // Texture
-	glm::vec3(0.5f, 0.5f, 0.f),			glm::vec3(1.f, 0.f, 0.f),		glm::vec2(1.f, 1.f),
-	glm::vec3(0.5f, -0.5f, 0.f),		glm::vec3(0.f, 1.f, 0.f),		glm::vec2(1.f, 0.f),
-	glm::vec3(-0.5f, -0.5f, 0.f),		glm::vec3(0.f, 0.f, 1.f),		glm::vec2(0.f, 0.f),
-	glm::vec3(-0.5f, 0.5f, 0.f),		glm::vec3(1.f, 1.f, 0.f),		glm::vec2(0.f, 1.f)
+	// Position								// Color						// Texture					// Normals
+	glm::vec3(-0.5f, 0.5f, 0.f),			glm::vec3(1.f, 0.f, 0.f),		glm::vec2(0.f, 1.f),		glm::vec3(0.f, 0.f, -1.f),
+	glm::vec3(-0.5f, -0.5f, 0.f),			glm::vec3(0.f, 1.f, 0.f),		glm::vec2(0.f, 0.f),		glm::vec3(0.f, 0.f, -1.f),
+	glm::vec3(0.5f, -0.5f, 0.f),			glm::vec3(0.f, 0.f, 1.f),		glm::vec2(1.f, 0.f),		glm::vec3(0.f, 0.f, -1.f),
+	glm::vec3(0.5f, 0.5f, 0.f),				glm::vec3(1.f, 1.f, 0.f),		glm::vec2(1.f, 1.f),		glm::vec3(0.f, 0.f, -1.f)
 };
 unsigned nrOfVertices = sizeof(vertices) / sizeof(Vertex);
 
@@ -120,6 +120,10 @@ void CreateVBO(void)
 	// Texture
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, texture));
 	glEnableVertexAttribArray(2);
+
+	// Normal
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
+	glEnableVertexAttribArray(3);
 }
 
 void DestroyVBO(void)
@@ -235,6 +239,11 @@ void Initialize(void)
 	rotation.x = 0.01f;
 
 
+	// LIGHTS
+	glm::vec3 lightPos0(0.f, 0.f, 2.f);
+	glm::vec3 cameraPos(0.f, 0.f, 3.f);
+
+
 	// INIT UNIFORMS
 
 	// Specify the value of the uniform texture variables for the current program object
@@ -247,7 +256,11 @@ void Initialize(void)
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(ViewMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
-	
+
+	// Assign light and camera postiion
+	glUniform3fv(glGetUniformLocation(ProgramId, "lightPos0"), 1, glm::value_ptr(lightPos0));
+	glUniform3fv(glGetUniformLocation(ProgramId, "cameraPos"), 1, glm::value_ptr(cameraPos));
+
 	glUseProgram(0); // Exit shader program
 }
 
