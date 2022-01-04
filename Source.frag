@@ -2,6 +2,15 @@
 // GLSL (OpenGL Shading Language) 
 #version 400
 
+struct Material
+{
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	sampler2D diffuseTex;
+	sampler2D specularTex;
+};
+
 // Input Values (from Vertex Shader)
 in vec3 ex_Position;
 in vec3 ex_Color;
@@ -12,8 +21,7 @@ in vec3 ex_Normal;
 out vec4 out_Color;
 
 // uniform = constant, each uniform has an id
-uniform sampler2D texture0;
-uniform sampler2D texture1;
+uniform Material material;
 
 uniform vec3 lightPos0;
 uniform vec3 cameraPos;
@@ -25,8 +33,7 @@ void main(void)
 	// PHONE LIGHTING
 
 	// Ambient light -> there is always a small amout of light
-	float ambientStrength = 0.1;
-	vec3 ambient = ambientStrength * lightColor;
+	vec3 ambient = material.ambient;
 
 
 	// Diffuse light -> gives objects brightness the closer the fragments
@@ -37,7 +44,7 @@ void main(void)
 	vec3 norm = normalize(ex_Normal); // make sure the normal is normalised
 
 	float diff = max(dot(norm, lightDir), 0.0); // get angle between lightDir and norm
-	vec3 diffuse = diff * lightColor; // get the diffuse component -> larger angle -> lower light
+	vec3 diffuse = diff * material.diffuse; // get the diffuse component -> larger angle -> lower light
 
 
 	// Specular light -> reflextion
@@ -48,10 +55,10 @@ void main(void)
 
 	 // specular component, the higher the power, the higher the shininess value
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35);
-	vec3 specular = specularStrength * spec * lightColor;
+	vec3 specular = specularStrength * spec * material.specular;
 
 	// Final Light
 	out_Color =
-	mix(texture(texture0, ex_Texture), texture(texture1, ex_Texture) * vec4(ex_Color, 1.), 0.4)
+	mix(texture(material.diffuseTex, ex_Texture), texture(material.specularTex, ex_Texture) * vec4(ex_Color, 1.), 0.4)
 	* (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
 }

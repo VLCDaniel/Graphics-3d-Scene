@@ -28,6 +28,7 @@ float fov = 90.f, nearPlane = 0.1f;
 
 // OBJECTS
 Texture* texture0, *texture1;
+Material* material0;
 
 Vertex vertices[] =
 {
@@ -156,7 +157,7 @@ void Initialize(void)
 	CreateShaders();
 	texture0 = new Texture("Images/container.jpg", GL_TEXTURE_2D, 0);
 	texture1 = new Texture("Images/pusheen2.png", GL_TEXTURE_2D, 1);
-
+	material0 = new Material(glm::vec3(0.1f), glm::vec3(1.f), glm::vec3(1.f), texture0->getTextureUnit(), texture1->getTextureUnit());
 
 	// INIT GL FUNCTIONS
 
@@ -215,13 +216,14 @@ void RenderFunction(void)
 	// Bind textures on corresponding texture units
 	texture0->bind();
 	texture1->bind();
+	material0->sendToShader(ProgramId);
 	glBindVertexArray(VAO); // Bind VAO
 
 	glUseProgram(ProgramId); // Use Program (Shader)
 
 
-	// UPDATE UNIFORMS
 
+	// UPDATE UNIFORMS
 	// Translate, rotate, scale
 	//rotation.x += 0.01f;
 	ModelMatrix = glm::mat4(1.0f);
@@ -230,7 +232,6 @@ void RenderFunction(void)
 	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f)); // Oy
 	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f)); // Oz
 	ModelMatrix = glm::scale(ModelMatrix, scale);
-
 	// Update the uniform variable in the shader each frame after calculating the matrix
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 
