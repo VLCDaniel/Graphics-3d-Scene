@@ -3,8 +3,8 @@
 class Mesh
 {
 private:
-	std::vector<Vertex> vertices;
-	std::vector<GLuint> indices;
+	unsigned nrOfVertices;
+	unsigned nrOfIndices;
 
 	GLuint VAO;
 	GLuint VBO;
@@ -16,51 +16,41 @@ private:
 
 	glm::mat4 ModelMatrix;
 
-	void initVertexData(Vertex* vertexArray,
-		const unsigned& nrOfVertices,
+	void initVAO(Vertex* vertexArray,
+		const unsigned nrOfVertices,
 		GLuint* indexArray,
-		const unsigned& nrOfIndices)
+		const unsigned nrOfIndices)
 	{
-		for (size_t i = 0; i < nrOfVertices; i++)
-		{
-			this->vertices.push_back(vertexArray[i]);
-		}
-
-		for (size_t i = 0; i < nrOfIndices; i++)
-		{
-			this->indices.push_back(indexArray[i]);
-		}
-	}
-
-	void initVAO()
-	{
-		/* VAO, VBO, EBO Buffers -> they are send to GPU memory all at once because data from
-							CPU -> GPU is send slow */
+		// SET VARIABLES
+		this->nrOfIndices = nrOfIndices;
+		this->nrOfVertices = nrOfVertices;
 
 
-		/* Vertex Array Objects -> stores VertexAttribPointers so you don't have to
-								bind and configure buffers every time we draw an object */
+		/* CREATE VAO
+		VAO, VBO, EBO Buffers -> they are send to GPU memory all at once because data from
+							     CPU -> GPU is send slow
+		Vertex Array Objects(VAO) -> stores VertexAttribPointers so you don't have to bind and 
+									 configure buffers every time we draw an object
 
-		// Generate VAO Buffer to its id and Bind it to the corresponding VertexArrayBuffer
+		Generate VAO Buffer to its id and Bind it to the corresponding VertexArrayBuffer */
 		glCreateVertexArrays(1, &this->VAO);
 		glBindVertexArray(this->VAO);
 
 
 		/* Vertex Buffer Objects -> stores vertices, normals, textures, etc.
-								   in the high speed memory of video card */
-
-								   // Generate VBO Buffer and Bind it to the corresponding ARRAY_BUFFER
+								    in the high speed memory of video card */
+		// Generate VBO Buffer and Bind it to the corresponding ARRAY_BUFFER
 		glGenBuffers(1, &this->VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 		// Any calls on the GL_ARRAY_BUFFER -> configures VBO Buffer
 		// Copy Vertex information in the memory Buffer
-		glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, this->nrOfVertices * sizeof(Vertex), vertexArray, GL_STATIC_DRAW);
 
 
 		// Element Buffer Objects -> stores indices to avoid point overlap
 		glGenBuffers(1, &this->EBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->nrOfIndices * sizeof(GLuint), indexArray, GL_STATIC_DRAW);
 
 
 		// Set VertexAttribPointers -> specify how to interpret the ArrayBuffer in the shaders
@@ -83,12 +73,15 @@ private:
 		glBindVertexArray(0);
 	}
 
-	void initModelMatrix()
+	void updateUniforms(GLuint ProgramId)
 	{
-		this->position = glm::vec3(0.f);
-		this->rotation = glm::vec3(0.f);
-		this->scale = glm::vec3(1.f);
+		glUseProgram(ProgramId);
+		glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(this->ModelMatrix));
+		glUseProgram(0);
+	}
 
+	void updateModelMatrix()
+	{
 		this->ModelMatrix = glm::mat4(1.0f);
 		this->ModelMatrix = glm::translate(this->ModelMatrix, this->position);
 		this->ModelMatrix = glm::rotate(this->ModelMatrix, glm::radians(this->rotation.x), glm::vec3(1.f, 0.f, 0.f)); // Ox
@@ -97,22 +90,22 @@ private:
 		this->ModelMatrix = glm::scale(this->ModelMatrix, this->scale);
 	}
 
-	void updateUniforms(GLuint ProgramId)
-	{
-		glUseProgram(ProgramId);
-		glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(this->ModelMatrix));
-		glUseProgram(0);
-	}
-
 public:
-	Mesh(Vertex* vertexArray,
+	Mesh(
+		Vertex* vertexArray,
 		const unsigned& nrOfVertices,
 		GLuint* indexArray,
-		const unsigned& nrOfIndices)
+		const unsigned& nrOfIndices,
+		glm::vec3 position = glm::vec3(0.0f),
+		glm::vec3 rotation = glm::vec3(0.0f),
+		glm::vec3 scale = glm::vec3(1.0f)
+	)
 	{
-		this->initVertexData(vertexArray, nrOfVertices, indexArray, nrOfIndices);
-		this->initVAO();
-		this->initModelMatrix();
+		this->position = position;
+		this->rotation = rotation;
+		this->scale = scale;
+		this->initVAO(vertexArray, nrOfVertices, indexArray, nrOfIndices);
+		this->updateModelMatrix();
 	}
 
 	~Mesh()
@@ -120,6 +113,40 @@ public:
 		glDeleteVertexArrays(1, &this->VAO);
 		glDeleteBuffers(1, &this->VBO);
 		glDeleteBuffers(1, &this->EBO);
+	}
+
+	// Accesors
+
+	// Modifiers
+	void setPosition(const glm::vec3 position)
+	{
+		this->position = position;
+	}
+
+	void setRotation(const glm::vec3 rotation)
+	{
+		this->rotation = rotation;
+	}
+
+	void setScale(const glm::vec3 scale)
+	{
+		this->scale = scale;
+	}
+
+	// Functions
+	void move(const glm::vec3 position)
+	{
+		this->position += position;
+	}
+
+	void rotate(const glm::vec3 rotation)
+	{
+		this->rotation += rotation;
+	}
+
+	void scaleUp(const glm::vec3 scale)
+	{
+		this->scale += scale;
 	}
 
 	void update()
@@ -130,6 +157,7 @@ public:
 	void render(GLint ProgramId)
 	{
 		// Update Uniforms
+		this->updateModelMatrix();
 		this->updateUniforms(ProgramId);
 
 		glUseProgram(ProgramId);
@@ -139,11 +167,11 @@ public:
 
 		// DRAW
 		//glPointSize(10.0);
-		//glDrawArrays(GL_POINTS, 0, this->vertices.size());
+		//glDrawArrays(GL_POINTS, 0, this->nrOfVertices);
 
-		if(this->indices.empty())
-			glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
+		if(this->nrOfIndices == 0)
+			glDrawArrays(GL_TRIANGLES, 0, this->nrOfVertices);
 		else
-			glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, this->nrOfIndices, GL_UNSIGNED_INT, 0);
 	}
 };

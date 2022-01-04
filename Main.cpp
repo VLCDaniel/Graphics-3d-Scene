@@ -29,7 +29,7 @@ float fov = 90.f, nearPlane = 0.1f;
 // OBJECTS
 Texture* texture0, *texture1;
 Material* material0;
-Mesh* test;
+Mesh* mesh;
 
 Vertex vertices[] =
 {
@@ -53,84 +53,33 @@ void processNormalKeys(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		position.z -= 0.01f;
+		mesh->move(glm::vec3(0.f, 0.f, -0.01f));
 		break;
 	case 's':
-		position.z += 0.01f;
+		mesh->move(glm::vec3(0.f, 0.f, 0.01f));
 		break;
 	case 'a':
-		position.x -= 0.01f;
+		mesh->move(glm::vec3(-0.01f, 0.f, 0.f));
 		break;
 	case 'd':
-		position.x += 0.01f;
+		mesh->move(glm::vec3(0.01f, 0.f, 0.f));
 		break;
 	case 'q':
-		rotation.y -= 1.f;
+		mesh->rotate(glm::vec3(0.f, -1.f, 0.f));
 		break;
 	case 'e':
-		rotation.y += 1.f;
+		mesh->rotate(glm::vec3(0.f, 1.f, 0.f));
 		break;
 	case 'z':
-		scale += 0.1f;
+		mesh->scaleUp(glm::vec3(1.f));
 		break;
 	case 'x':
-		scale -= 0.1f;
+		mesh->scaleUp(glm::vec3(-1.f));
 		break;
 	case 27: // Esc -> exit
 		glutLeaveMainLoop();
 		break;
 	}
-}
-
-void CreateVBO(void)
-{
-	/* VAO, VBO, EBO Buffers -> they are send to GPU memory all at once because data from
-								CPU -> GPU is send slow */
-
-
-	/* Vertex Array Objects -> stores VertexAttribPointers so you don't have to
-								bind and configure buffers every time we draw an object */
-
-	// Generate VAO Buffer to its id and Bind it to the corresponding VertexArrayBuffer
-	glCreateVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-
-	/* Vertex Buffer Objects -> stores vertices, normals, textures, etc.
-							   in the high speed memory of video card */
-
-							   // Generate VBO Buffer and Bind it to the corresponding ARRAY_BUFFER
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// Any calls on the GL_ARRAY_BUFFER -> configures VBO Buffer
-	// Copy Vertex information in the memory Buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-
-	// Element Buffer Objects -> stores indices to avoid point overlap
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-
-	// Set VertexAttribPointers -> specify how to interpret the ArrayBuffer in the shaders
-	// Position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
-	glEnableVertexAttribArray(0);
-
-	// Color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, color));
-	glEnableVertexAttribArray(1);
-
-	// Texture
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, texture));
-	glEnableVertexAttribArray(2);
-
-	// Normal
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
-	glEnableVertexAttribArray(3);
-
-	glBindVertexArray(0);
 }
 
 void DestroyVBO(void)
@@ -154,20 +103,7 @@ void DestroyShaders(void)
 
 void Initialize(void)
 {
-	// INIT OBJECTS
-
-	CreateVBO();
-	CreateShaders();
-
-	// MODEL MESH
-	test = new Mesh(vertices, nrOfVertices, indices, nrOfIndices);
-
-	texture0 = new Texture("Images/container.jpg", GL_TEXTURE_2D, 0);
-	texture1 = new Texture("Images/pusheen2.png", GL_TEXTURE_2D, 1);
-	material0 = new Material(glm::vec3(0.1f), glm::vec3(1.f), glm::vec3(1.f), texture0->getTextureUnit(), texture1->getTextureUnit());
-
 	// INIT GL FUNCTIONS
-
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f); // specify clear values for the color buffers
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_CULL_FACE);
@@ -178,9 +114,19 @@ void Initialize(void)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // How polygons are drawn, try GL_LINE
 
 
-	// INIT POSITIONS
+	// INIT OBJECTS
+	CreateShaders();
+	mesh = new Mesh(vertices, nrOfVertices, indices, nrOfIndices,
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f));
+	texture0 = new Texture("Images/container.jpg", GL_TEXTURE_2D, 0);
+	texture1 = new Texture("Images/pusheen2.png", GL_TEXTURE_2D, 1);
+	material0 = new Material(glm::vec3(0.1f), glm::vec3(1.f), glm::vec3(1.f), texture0->getTextureUnit(), texture1->getTextureUnit());
 
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	// INIT POSITIONS
+	//ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
 	ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)winWidth / (float)winHeight, 0.1f, 100.0f);
 	rotation.x = 0.01f;
@@ -192,7 +138,6 @@ void Initialize(void)
 
 
 	// INIT UNIFORMS
-
 	// Specify the value of the uniform texture variables for the current program object
 	glUseProgram(ProgramId); // make sure we use our program(shader)
 	// Assign texture units
@@ -200,7 +145,7 @@ void Initialize(void)
 	glUniform1i(glGetUniformLocation(ProgramId, "texture1"), texture1->getTextureUnit());
 
 	// Assign World Matrices
-	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
+	//glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(ViewMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
 
@@ -218,38 +163,26 @@ void RenderFunction(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-	// BIND
-
+	// BIND BUFFERS
+	glUseProgram(ProgramId); // Use Program (Shader)
 	// Bind textures on corresponding texture units
 	texture0->bind();
 	texture1->bind();
 	material0->sendToShader(ProgramId);
-	glBindVertexArray(VAO); // Bind VAO
-
-	glUseProgram(ProgramId); // Use Program (Shader)
-
 
 
 	// UPDATE UNIFORMS
-	// Translate, rotate, scale
-	//rotation.x += 0.01f;
-	ModelMatrix = glm::mat4(1.0f);
-	ModelMatrix = glm::translate(ModelMatrix, position);
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.x), glm::vec3(1.f, 0.f, 0.f)); // Ox
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f)); // Oy
-	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f)); // Oz
-	ModelMatrix = glm::scale(ModelMatrix, scale);
+	// !!!only if you need to update them each frame, if not, set them in initialization()
+	
+	//glUniform1i(glGetUniformLocation(ProgramId, "texture0"), texture0->getTextureUnit());
+	//glUniform1i(glGetUniformLocation(ProgramId, "texture1"), texture1->getTextureUnit());
+
 	// Update the uniform variable in the shader each frame after calculating the matrix
-	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
+	//glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 
 
 	// DRAW
-
-	//glPointSize(10.0);
-	//glDrawArrays(GL_TRIANGLES, 0, nrOfVertices);
-	glDrawElements(GL_TRIANGLES, nrOfIndices, GL_UNSIGNED_INT, 0);
-
-	test->render(ProgramId);
+	mesh->render(ProgramId);
 
 
 	glutSwapBuffers(); // One buffer is shown, one buffer is drawn
