@@ -1,9 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-#include "glm/glm/glm.hpp" 
-#include "glm/glm/gtc/type_ptr.hpp"
-
 class Material
 {
 private:

@@ -1,8 +1,11 @@
 #pragma once
 
+// Standard
 #include<iostream>
 #include<fstream>
 #include<string>
+#include <vector>
+#include <minmax.h>
 
 // GLM provides math functions
 #include "glm/glm/glm.hpp"  
@@ -11,17 +14,12 @@
 #include "glm/glm/gtc/type_ptr.hpp"
 #include <GL/glew.h> // provides newer OpenGL functionality
 #include <GL/freeglut.h> // create and manage windows containing OpenGL contexts
+
+
+// Local
 #include "SOIL.h" // to load images
-
-
-#include "loadShaders.h"
+#include "Vertex.h"
+#include "Shader.h"
 #include "Texture.h"
 #include "Material.h"
-
-struct Vertex
-{
-	glm::vec3 position;
-	glm::vec3 color;
-	glm::vec2 texture;
-	glm::vec3 normal;
-};
+#include "Mesh.h"
