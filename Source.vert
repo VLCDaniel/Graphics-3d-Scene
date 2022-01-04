@@ -16,7 +16,7 @@ void main(void)
 {
     ex_Position = in_Position;
     ex_Color = in_Color;
-    ex_Texture = vec2(in_Texture.x, 1 - in_Texture.y);
+    ex_Texture = vec2(in_Texture.x, 1 - in_Texture.y); // Texture is flipped on oy by default
 
     gl_Position = vec4(in_Position, 1.0f); // Output of the Vertex Shader
 } 
