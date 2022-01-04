@@ -31,23 +31,6 @@ Texture* texture0, *texture1;
 Material* material0;
 Mesh* mesh;
 
-Vertex vertices[] =
-{
-	// Position								// Color						// Texture					// Normals
-	glm::vec3(-0.5f, 0.5f, 0.f),			glm::vec3(1.f, 0.f, 0.f),		glm::vec2(0.f, 1.f),		glm::vec3(0.f, 0.f, 1.f),
-	glm::vec3(-0.5f, -0.5f, 0.f),			glm::vec3(0.f, 1.f, 0.f),		glm::vec2(0.f, 0.f),		glm::vec3(0.f, 0.f, 1.f),
-	glm::vec3(0.5f, -0.5f, 0.f),			glm::vec3(0.f, 0.f, 1.f),		glm::vec2(1.f, 0.f),		glm::vec3(0.f, 0.f, 1.f),
-	glm::vec3(0.5f, 0.5f, 0.f),				glm::vec3(1.f, 1.f, 0.f),		glm::vec2(1.f, 1.f),		glm::vec3(0.f, 0.f, 1.f)
-};
-unsigned nrOfVertices = sizeof(vertices) / sizeof(Vertex);
-
-GLuint indices[] =
-{
-	0, 1, 3,	// Triangle 1
-	1, 2, 3		// Triangle 2
-};
-unsigned nrOfIndices = sizeof(indices) / sizeof(GLuint);
-
 void processNormalKeys(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -116,7 +99,9 @@ void Initialize(void)
 
 	// INIT OBJECTS
 	CreateShaders();
-	mesh = new Mesh(vertices, nrOfVertices, indices, nrOfIndices,
+	Quad tempQuad = Quad();
+	//Triangle tempTriangle = Triangle();
+	mesh = new Mesh(&tempQuad,
 		glm::vec3(0.0f),
 		glm::vec3(0.0f),
 		glm::vec3(1.0f));
@@ -145,7 +130,6 @@ void Initialize(void)
 	glUniform1i(glGetUniformLocation(ProgramId, "texture1"), texture1->getTextureUnit());
 
 	// Assign World Matrices
-	//glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(ViewMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
 
