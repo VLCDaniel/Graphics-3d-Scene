@@ -3,13 +3,20 @@
 // VARIABLES
 GLint winWidth = 800;
 GLint winHeight = 600;
-GLuint ProgramId;
+
+// Mouse Input
+double mouseOffsetX = 0.0f;
+double mouseOffsetY = 0.0f;
+double lastMouseX = 0.0f;
+double lastMouseY = 0.0f;
+bool firstMouse = true;
 
 std::vector<GLuint*> shaders;
 std::vector<Texture*> textures;
 std::vector<Material*> materials;
 std::vector<Mesh*> meshes;
 std::vector<glm::vec3*> lights;
+Camera* camera;
 
 
 // ENUMERATIONS
@@ -25,13 +32,11 @@ enum mesh_enum { MESH_QUAD = 0, MESH_TRIANGLE = 1, MESH_PYRAMID = 2 };
 /* World space -> View space, transform World-space coordinates with ViewMatrix to
 				  coordinates that are in front of the user view(camera perspective) */
 glm::mat4 ViewMatrix(1.0f);
-glm::vec3 camPosition(0.f, 0.f, 3.f);
-glm::vec3 worldUp(0.f, 1.f, 0.f);
-glm::vec3 camFront(0.f, 0.f, -1.f);
 
 /* View space -> Clip space, project coordinates within a given range(frustum) back
 				 to the Normalized Device Coordinates (-1, 1) with ProjectionMatrix
 */
+
 glm::mat4 ProjectionMatrix(1.0f);
 float fov = 90.f; // field of view value -> how large the viewspace is, realistic view = 45 deg
 float nearPlane = 0.1f;
@@ -39,8 +44,6 @@ float farPlane = 1000.f;
 
 void initMatrices()
 {
-	// ViewSpace -> camera position, reference point, world "upwards" direction
-	ViewMatrix = glm::lookAt(camPosition, camPosition + camFront, worldUp);
 	// ClipSpace -> fov, aspect ratio (from the viewport), near and far plan of the frustum
 	ProjectionMatrix = glm::perspective(glm::radians(fov), (float)winWidth / (float)winHeight, nearPlane, farPlane);
 }
@@ -99,6 +102,11 @@ void initLights()
 	lights.push_back(new glm::vec3(0.f, 0.f, 1.f));
 }
 
+void initCamera()
+{
+	camera = new Camera(glm::vec3(0.f, 0.f, 3.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
+}
+
 void initUniforms()
 {
 	// INIT UNIFORMS
@@ -106,13 +114,11 @@ void initUniforms()
 	glUseProgram(*shaders[SHADER_CORE_PROGRAM]); // make sure we use our program(shader)
 
 	// Assign World Matrices
-	glUniformMatrix4fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(ViewMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
 
 	// Assign light and camera position
-	glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "lightPos0"), 1, glm::value_ptr(*lights[0]));
-	glm::vec3 cameraPos(0.f, 0.f, 1.f);
-	glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "cameraPos"), 1, glm::value_ptr(cameraPos));
+	/*glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "lightPos0"), 1, glm::value_ptr(*lights[0]));
+	*/
 
 	glUseProgram(0); // Exit shader program
 }
@@ -220,4 +226,15 @@ void freeMemory()
 
 	for (size_t i = 0; i < lights.size(); i++)
 		delete lights[i];
+}
+
+// Update Uniforms
+void updateUniforms()
+{
+	// Update view matrix (camera)
+	//ViewMatrix = glm::lookAt(camPosition, camPosition + camFront, worldUp);
+	ViewMatrix = camera->getViewMatrix();
+	glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "lightPos0"), 1, glm::value_ptr(camera->getPosition()));
+	glUniformMatrix4fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(ViewMatrix));
+	glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "cameraPos"), 1, glm::value_ptr(camera->getPosition()));
 }

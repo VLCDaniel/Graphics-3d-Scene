@@ -18,6 +18,7 @@
 
 // Local Libraries
 #include "SOIL.h" // to load images
+#include "Camera.h"
 #include "Vertex.h"
 #include "Shader.h"
 #include "Texture.h"

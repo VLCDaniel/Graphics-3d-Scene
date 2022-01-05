@@ -8,22 +8,22 @@ void processNormalKeys(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		meshes[MESH_QUAD]->move(glm::vec3(0.f, 0.f, -0.01f));
+		camera->move(FORWARD);
 		break;
 	case 's':
-		meshes[MESH_QUAD]->move(glm::vec3(0.f, 0.f, 0.01f));
+		camera->move(BACKWARD);
 		break;
 	case 'a':
-		meshes[MESH_QUAD]->move(glm::vec3(-0.01f, 0.f, 0.f));
+		camera->move(LEFT);
 		break;
 	case 'd':
-		meshes[MESH_QUAD]->move(glm::vec3(0.01f, 0.f, 0.f));
+		camera->move(RIGHT);
 		break;
-	case 'q':
-		meshes[2]->rotate(glm::vec3(0.f, -1.f, 0.f));
+	case '[':
+		camera->move(UP);
 		break;
-	case 'e':
-		meshes[2]->rotate(glm::vec3(0.f, 1.f, 0.f));
+	case ']':
+		camera->move(DOWN);
 		break;
 	case 'z':
 		meshes[MESH_QUAD]->scaleUp(glm::vec3(1.f));
@@ -43,6 +43,25 @@ void processNormalKeys(unsigned char key, int x, int y)
 	}
 }
 
+void processSpecialKeys(int key, int xx, int yy)
+{
+	switch (key)
+	{
+	case GLUT_KEY_UP:
+		camera->updatePitch(1.0);
+		break;
+	case GLUT_KEY_DOWN:
+		camera->updatePitch(-1.0);
+		break;
+	case GLUT_KEY_LEFT:
+		camera->updateYaw(-1.0);
+		break;
+	case GLUT_KEY_RIGHT:
+		camera->updateYaw(1.0);
+		break;
+	}
+}
+
 void Initialize(void)
 {
 	// INIT GL FUNCTIONS
@@ -54,6 +73,7 @@ void Initialize(void)
 	glEnable(GL_BLEND); // render images with different levels of transparency
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // factor values for blending
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // How polygons are drawn, try GL_LINE
+	//glutSetCursor(GLUT_CURSOR_NONE); // Don't display the mouse cursor
 
 
 	// INIT VARIABLES
@@ -63,6 +83,7 @@ void Initialize(void)
 	initMaterials();
 	initMeshes();
 	initLights();
+	initCamera();
 	initUniforms();
 }
 
@@ -78,10 +99,9 @@ void RenderFunction(void)
 	textures[TEX_CONTAINER]->bind(0);
 	textures[TEX_CONTAINER_SPECULAR]->bind(1);
 
-
 	// UPDATE UNIFORMS
+	updateUniforms();
 	// !!!only if you need to update them each frame, if not, set them in initialization()
-	
 	//glUniform1i(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "texture0"), textures[TEX_PUSHEEN]->getTextureUnit());
 	//glUniform1i(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "texture1"), textures[TEX_CONTAINER]->getTextureUnit());
 
@@ -153,7 +173,7 @@ int main(int argc, char* argv[])
 	glutDisplayFunc(RenderFunction); // Redraw windows when change size, move window, key press, etc.
 	glutIdleFunc(glutPostRedisplay); // When no events are happening -> redisplay window
 	glutKeyboardFunc(processNormalKeys); // Key pressed -> processNormalKeys callback for the current window
-	//glutSpecialFunc(processSpecialKeys);
+	glutSpecialFunc(processSpecialKeys);
 	glutReshapeFunc(reshapeFcn); // When resize window -> callback reshapeFcn
 	glutCloseFunc(Cleanup); // When window is destroyed, call Cleanup function
 	glutMainLoop(); // Loops main looking for events, keeps window open
