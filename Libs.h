@@ -1,6 +1,6 @@
 #pragma once
 
-// Standard
+// Standard Libraries
 #include<iostream>
 #include<fstream>
 #include<string>
@@ -16,7 +16,7 @@
 #include <GL/freeglut.h> // create and manage windows containing OpenGL contexts
 
 
-// Local
+// Local Libraries
 #include "SOIL.h" // to load images
 #include "Vertex.h"
 #include "Shader.h"
