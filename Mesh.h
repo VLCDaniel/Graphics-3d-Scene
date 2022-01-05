@@ -77,7 +77,7 @@ private:
 	{
 		// SET VARIABLES
 		this->nrOfIndices = primitive->getNrOfIndices();
-		this->nrOfVertices = primitive->getNrOfIndices();
+		this->nrOfVertices = primitive->getNrOfVertices();
 
 		//CREATE VAO
 		glCreateVertexArrays(1, &this->VAO);
@@ -226,7 +226,7 @@ public:
 		//glPointSize(10.0);
 		//glDrawArrays(GL_POINTS, 0, this->nrOfVertices);
 
-		if(this->nrOfIndices == 0)
+		if (this->nrOfIndices == 0)
 			glDrawArrays(GL_TRIANGLES, 0, this->nrOfVertices);
 		else
 			glDrawElements(GL_TRIANGLES, this->nrOfIndices, GL_UNSIGNED_INT, 0);

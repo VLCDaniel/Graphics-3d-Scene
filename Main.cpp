@@ -20,10 +20,10 @@ void processNormalKeys(unsigned char key, int x, int y)
 		meshes[MESH_QUAD]->move(glm::vec3(0.01f, 0.f, 0.f));
 		break;
 	case 'q':
-		meshes[MESH_QUAD]->rotate(glm::vec3(0.f, -1.f, 0.f));
+		meshes[2]->rotate(glm::vec3(0.f, -1.f, 0.f));
 		break;
 	case 'e':
-		meshes[MESH_QUAD]->rotate(glm::vec3(0.f, 1.f, 0.f));
+		meshes[2]->rotate(glm::vec3(0.f, 1.f, 0.f));
 		break;
 	case 'z':
 		meshes[MESH_QUAD]->scaleUp(glm::vec3(1.f));
@@ -92,11 +92,11 @@ void RenderFunction(void)
 
 
 	// DRAW
-	meshes[MESH_QUAD]->render(*shaders[SHADER_CORE_PROGRAM]);
+	meshes[2]->render(*shaders[SHADER_CORE_PROGRAM]);
 
 	//textures[TEX_PUSHEEN]->bind(1);
 	//textures[TEX_CONTAINER]->bind(0);
-	//meshes[1]->render(*shaders[SHADER_CORE_PROGRAM]);
+	//meshes[0]->render(*shaders[SHADER_CORE_PROGRAM]);
 
 	// END DRAW
 	glutSwapBuffers(); // One buffer is shown, one buffer is drawn

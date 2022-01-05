@@ -16,7 +16,7 @@ std::vector<glm::vec3*> lights;
 enum shader_enum { SHADER_CORE_PROGRAM = 0 };
 enum texture_enum { TEX_CONTAINER = 0, TEX_CONTAINER_SPECULAR = 1, TEX_PUSHEEN = 2, TEX_PUSHEEN_SPECULAR = 3 };
 enum material_enum { MAT_1 = 0 };
-enum mesh_enum { MESH_QUAD = 0 };
+enum mesh_enum { MESH_QUAD = 0, MESH_TRIANGLE = 1, MESH_PYRAMID = 2 };
 
 
 // INITIALISATIONS
@@ -73,7 +73,6 @@ void initMaterials()
 void initMeshes()
 {
 	Quad tempQuad = Quad();
-	//Triangle tempTriangle = Triangle();
 	meshes.push_back(new Mesh(&tempQuad,
 		glm::vec3(0.0f),
 		glm::vec3(0.0f),
@@ -81,8 +80,14 @@ void initMeshes()
 	);
 
 	Triangle tempTriangle = Triangle();
-	//Triangle tempTriangle = Triangle();
 	meshes.push_back(new Mesh(&tempTriangle,
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f))
+	);
+
+	Pyramid tempPyramid = Pyramid();
+	meshes.push_back(new Mesh(&tempPyramid,
 		glm::vec3(0.0f),
 		glm::vec3(0.0f),
 		glm::vec3(1.0f))
