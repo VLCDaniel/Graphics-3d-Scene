@@ -31,6 +31,12 @@ void processNormalKeys(unsigned char key, int x, int y)
 	case 'x':
 		meshes[MESH_QUAD]->scaleUp(glm::vec3(-1.f));
 		break;
+	case 'f':
+		meshes[MESH_QUAD]->move(glm::vec3(0., 0.01, 0.f));
+		break;
+	case 'g':
+		meshes[MESH_QUAD]->move(glm::vec3(0., -0.01, 0.f));
+		break;
 	case 27: // Esc -> exit
 		glutLeaveMainLoop();
 		break;
@@ -69,8 +75,8 @@ void RenderFunction(void)
 	// BIND BUFFERS
 	glUseProgram(*shaders[SHADER_CORE_PROGRAM]); // Use Program (Shader)
 	// Bind textures on corresponding texture units
-	textures[TEX_PUSHEEN]->bind(0);
-	textures[TEX_CONTAINER]->bind(1);
+	textures[TEX_CONTAINER]->bind(0);
+	textures[TEX_CONTAINER_SPECULAR]->bind(1);
 
 
 	// UPDATE UNIFORMS
@@ -88,9 +94,9 @@ void RenderFunction(void)
 	// DRAW
 	meshes[MESH_QUAD]->render(*shaders[SHADER_CORE_PROGRAM]);
 
-	textures[TEX_PUSHEEN]->bind(1);
-	textures[TEX_CONTAINER]->bind(0);
-	meshes[1]->render(*shaders[SHADER_CORE_PROGRAM]);
+	//textures[TEX_PUSHEEN]->bind(1);
+	//textures[TEX_CONTAINER]->bind(0);
+	//meshes[1]->render(*shaders[SHADER_CORE_PROGRAM]);
 
 	// END DRAW
 	glutSwapBuffers(); // One buffer is shown, one buffer is drawn
@@ -122,6 +128,7 @@ void Cleanup(void)
 {
 	// Destroy Objects / Free Memory
 	glDeleteProgram(*shaders[SHADER_CORE_PROGRAM]);
+	freeMemory();
 }
 
 int main(int argc, char* argv[])

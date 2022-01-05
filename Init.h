@@ -14,7 +14,7 @@ std::vector<glm::vec3*> lights;
 
 // ENUMERATIONS
 enum shader_enum { SHADER_CORE_PROGRAM = 0 };
-enum texture_enum { TEX_PUSHEEN = 0, TEX_CONTAINER = 1 };
+enum texture_enum { TEX_CONTAINER = 0, TEX_CONTAINER_SPECULAR = 1, TEX_PUSHEEN = 2, TEX_PUSHEEN_SPECULAR = 3 };
 enum material_enum { MAT_1 = 0 };
 enum mesh_enum { MESH_QUAD = 0 };
 
@@ -52,8 +52,13 @@ void initShaders()
 
 void initTextures()
 {
+	// TEXTURE 0
 	textures.push_back(new Texture("Images/container.jpg", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/container_specular.jpg", GL_TEXTURE_2D));
+
+	// TEXTURE 1
 	textures.push_back(new Texture("Images/pusheen2.png", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/pusheen2_specular.png", GL_TEXTURE_2D));
 }
 
 void initMaterials()

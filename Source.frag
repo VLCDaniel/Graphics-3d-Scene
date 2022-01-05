@@ -53,7 +53,7 @@ vec3 calculateSpecular()
 
 	// specular component, the higher the power, the higher the shininess value
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35);
-	return (specularStrength * spec * material.specular);
+	return (specularStrength * spec * material.specular * texture(material.specularTex, ex_Texture).rgb);
 }
 
 void main(void)
@@ -70,7 +70,11 @@ void main(void)
 	vec3 specular = calculateSpecular();
 
 	// Final Light
+//	out_Color =
+//	mix(texture(material.diffuseTex, ex_Texture), texture(material.specularTex, ex_Texture) * vec4(ex_Color, 1.), 0.4)
+//	* (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
+
 	out_Color =
-	mix(texture(material.diffuseTex, ex_Texture), texture(material.specularTex, ex_Texture) * vec4(ex_Color, 1.), 0.4)
+	texture(material.diffuseTex, ex_Texture)
 	* (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
 }
