@@ -3,27 +3,23 @@
 
 GLint winWidth = 800;
 GLint winHeight = 600;
-GLuint ProgramId, TextureId, SecondTextureId, VAO, VBO, EBO;
+GLuint ProgramId;
 
-// WORLD TRANSFORMATIONS
-
-/* Local space -> World space, transform objects with ModelMatrix
-				  and place them into their world (outside of -1,1 restriction) */
-glm::mat4 ModelMatrix(1.0f);
-glm::vec3 position(0.f), rotation(0.f), scale(1.f);
-
+// WORLD TRANSFORMATIONS - MATRICES
 /* World space -> View space, transform World-space coordinates with ViewMatrix to
 				  coordinates that are in front of the user view(camera perspective) */
 glm::mat4 ViewMatrix(1.0f);
+glm::vec3 camPosition(0.f, 0.f, 1.f);
+glm::vec3 worldUp(0.f, 1.f, 0.f);
+glm::vec3 camFront(0.f, 0.f, -1.f);
 
 /* View space -> Clip space, project coordinates within a given range(frustum) back
 				 to the Normalized Device Coordinates (-1, 1) with ProjectionMatrix
 */
 glm::mat4 ProjectionMatrix(1.0f);
-
-
-glm::vec3 camPostion(0.f, 0.f, 1.f), worldUp(0.f, 1.f, 0.f), camFront(0.f, 0.f, -1.f);
-float fov = 90.f, nearPlane = 0.1f;
+float fov = 90.f; // field of view value -> how large the viewspace is, realistic view = 45 deg
+float nearPlane = 0.1f;
+float farPlane = 1000.f;
 
 
 // OBJECTS
@@ -65,14 +61,6 @@ void processNormalKeys(unsigned char key, int x, int y)
 	}
 }
 
-void DestroyVBO(void)
-{
-	// De-allocate buffers
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-}
-
 void CreateShaders(void)
 {
 	ProgramId = LoadShaders("Source.vert", "Source.frag");
@@ -110,13 +98,11 @@ void Initialize(void)
 	material0 = new Material(glm::vec3(0.1f), glm::vec3(1.f), glm::vec3(1.f), texture0->getTextureUnit(), texture1->getTextureUnit());
 
 
-	// INIT POSITIONS
-	//ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
-	ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)winWidth / (float)winHeight, 0.1f, 100.0f);
-	rotation.x = 0.01f;
-
-
+	// INIT VARIABLES
+	// ViewSpace -> camera position, reference point, world "upwards" direction
+	ViewMatrix = glm::lookAt(camPosition, camPosition + camFront, worldUp);
+	// ClipSpace -> fov, aspect ratio (from the viewport), near and far plan of the frustum
+	ProjectionMatrix = glm::perspective(glm::radians(fov), (float)winWidth / (float)winHeight, nearPlane, farPlane);
 	// LIGHTS
 	glm::vec3 lightPos0(0.f, 0.f, 2.f);
 	glm::vec3 cameraPos(0.f, 0.f, 3.f);
@@ -142,10 +128,8 @@ void Initialize(void)
 
 void RenderFunction(void)
 {
-	// Clear buffers each frame
-	// Depth Buffer -> if z value < current z value, don't render pixel
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear buffers each frame
+	glEnable(GL_DEPTH_TEST); // Depth Buffer -> if z value < current z value, don't render pixel
 
 	// BIND BUFFERS
 	glUseProgram(ProgramId); // Use Program (Shader)
@@ -168,9 +152,15 @@ void RenderFunction(void)
 	// DRAW
 	mesh->render(ProgramId);
 
-
+	// END DRAW
 	glutSwapBuffers(); // One buffer is shown, one buffer is drawn
 	glFlush(); // Push all buffered operations to OpenGL
+
+	// RESET
+	glBindVertexArray(0);
+	glUseProgram(0);
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void reshapeFcn(GLint newWidth, GLint newHeight)
@@ -189,7 +179,6 @@ void reshapeFcn(GLint newWidth, GLint newHeight)
 void Cleanup(void)
 {
 	DestroyShaders();
-	DestroyVBO();
 }
 
 int main(int argc, char* argv[])
