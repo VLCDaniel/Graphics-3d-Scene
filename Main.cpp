@@ -25,18 +25,6 @@ void processNormalKeys(unsigned char key, int x, int y)
 	case ']':
 		camera->move(DOWN);
 		break;
-	case 'z':
-		meshes[MESH_QUAD]->scaleUp(glm::vec3(1.f));
-		break;
-	case 'x':
-		meshes[MESH_QUAD]->scaleUp(glm::vec3(-1.f));
-		break;
-	case 'f':
-		meshes[MESH_QUAD]->move(glm::vec3(0., 0.01, 0.f));
-		break;
-	case 'g':
-		meshes[MESH_QUAD]->move(glm::vec3(0., -0.01, 0.f));
-		break;
 	case 27: // Esc -> exit
 		glutLeaveMainLoop();
 		break;
@@ -81,7 +69,7 @@ void Initialize(void)
 	initShaders();
 	initTextures();
 	initMaterials();
-	initMeshes();
+	initModels();
 	initLights();
 	initCamera();
 	initUniforms();
@@ -92,41 +80,24 @@ void RenderFunction(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear buffers each frame
 	glEnable(GL_DEPTH_TEST); // Depth Buffer -> if z value < current z value, don't render pixel
 
-
-	// BIND BUFFERS
 	glUseProgram(*shaders[SHADER_CORE_PROGRAM]); // Use Program (Shader)
-	// Bind textures on corresponding texture units
-	textures[TEX_CONTAINER]->bind(0);
-	textures[TEX_CONTAINER_SPECULAR]->bind(1);
 
 	// UPDATE UNIFORMS
 	updateUniforms();
-	// !!!only if you need to update them each frame, if not, set them in initialization()
-	//glUniform1i(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "texture0"), textures[TEX_PUSHEEN]->getTextureUnit());
-	//glUniform1i(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "texture1"), textures[TEX_CONTAINER]->getTextureUnit());
 
-	// Update the uniform variable in the shader each frame after calculating the matrix
-	//glUniformMatrix4fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
-
-	materials[MAT_1]->sendToShader(*shaders[SHADER_CORE_PROGRAM]);
+	//materials[MAT_1]->sendToShader(*shaders[SHADER_CORE_PROGRAM]);
 
 
 	// DRAW
-	meshes[2]->render(*shaders[SHADER_CORE_PROGRAM]);
-
-	//textures[TEX_PUSHEEN]->bind(1);
-	//textures[TEX_CONTAINER]->bind(0);
-	//meshes[0]->render(*shaders[SHADER_CORE_PROGRAM]);
+	for (auto& i : models)
+	{
+		i->rotate(glm::vec3(0.f, 0.01f, 0.f));
+		i->render(*shaders[SHADER_CORE_PROGRAM]);
+	}
 
 	// END DRAW
 	glutSwapBuffers(); // One buffer is shown, one buffer is drawn
 	glFlush(); // Push all buffered operations to OpenGL
-
-	// RESET
-	glBindVertexArray(0);
-	glUseProgram(0);
-	glActiveTexture(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void reshapeFcn(GLint newWidth, GLint newHeight)

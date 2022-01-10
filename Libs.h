@@ -6,6 +6,7 @@
 #include<string>
 #include <vector>
 #include <minmax.h>
+#include <sstream>
 
 // GLM provides math functions
 #include "glm/glm/glm.hpp"  
@@ -25,3 +26,5 @@
 #include "Material.h"
 #include "Primitive.h"
 #include "Mesh.h"
+#include "Model.h"
+#include "OBJLoader.h"

@@ -14,7 +14,7 @@ bool firstMouse = true;
 std::vector<GLuint*> shaders;
 std::vector<Texture*> textures;
 std::vector<Material*> materials;
-std::vector<Mesh*> meshes;
+std::vector<Model*> models;
 std::vector<glm::vec3*> lights;
 Camera* camera;
 
@@ -68,38 +68,72 @@ void initMaterials()
 {
 	materials.push_back(new Material(glm::vec3(0.1f), // ambient light
 		glm::vec3(1.f), // diffuse light
-		glm::vec3(1.f), // specular light
+		glm::vec3(2.f), // specular light
 		0, // textures
 		1));
 }
 
-void initMeshes()
+void initModels()
 {
-	Quad tempQuad = Quad();
-	meshes.push_back(new Mesh(&tempQuad,
-		glm::vec3(0.0f),
-		glm::vec3(0.0f),
-		glm::vec3(1.0f))
-	);
+	std::vector<Mesh*> meshes;
 
-	Triangle tempTriangle = Triangle();
-	meshes.push_back(new Mesh(&tempTriangle,
-		glm::vec3(0.0f),
-		glm::vec3(0.0f),
-		glm::vec3(1.0f))
-	);
+	//Triangle tempTriangle = Triangle();
+	//meshes.push_back(new Mesh(&tempTriangle,
+	//	glm::vec3(0.0f),
+	//  glm::vec3(0.0f),
+	//	glm::vec3(0.0f),
+	//	glm::vec3(1.0f))
+	//);
 
 	Pyramid tempPyramid = Pyramid();
 	meshes.push_back(new Mesh(&tempPyramid,
 		glm::vec3(0.0f),
 		glm::vec3(0.0f),
+		glm::vec3(0.0f),
 		glm::vec3(1.0f))
 	);
+
+	//Cube tempCube = Cube();
+	//meshes.push_back(new Mesh(&tempCube,
+	//	glm::vec3(0.0f),
+	//  glm::vec3(0.0f),
+	//	glm::vec3(0.0f),
+	//	glm::vec3(1.0f))
+	//);
+
+	models.push_back(new Model(
+		glm::vec3(0.f),
+		materials[0],
+		textures[TEX_CONTAINER],
+		textures[TEX_CONTAINER_SPECULAR],
+		meshes
+	));
+
+	Quad tempQuad = Quad();
+	meshes.push_back(new Mesh(&tempQuad,
+		glm::vec3(0.0f, 0.0f, 0.7f),
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f))
+	);
+
+	models.push_back(new Model(
+		glm::vec3(1.5f, 0.f, 0.f),
+		materials[0],
+		textures[TEX_PUSHEEN],
+		textures[TEX_PUSHEEN_SPECULAR],
+		meshes
+	));
+
+	for (auto*& i : meshes)
+		delete i;
+
+	meshes.clear();
 }
 
 void initLights()
 {
-	lights.push_back(new glm::vec3(0.f, 0.f, 1.f));
+	lights.push_back(new glm::vec3(0.f, 0.f, 3.f));
 }
 
 void initCamera()
@@ -117,98 +151,11 @@ void initUniforms()
 	glUniformMatrix4fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
 
 	// Assign light and camera position
-	/*glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "lightPos0"), 1, glm::value_ptr(*lights[0]));
-	*/
+	//glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "lightPos0"), 1, glm::value_ptr(*lights[0]));
+	
 
 	glUseProgram(0); // Exit shader program
 }
-
-//void initModels()
-//{
-//	std::vector<Mesh*>meshes;
-//	std::vector<Mesh*>meshes2;
-//
-//	meshes.push_back(
-//		new Mesh(
-//			&Pyramid(),
-//			glm::vec3(1.f, 0.f, 0.f),
-//			glm::vec3(0.f),
-//			glm::vec3(0.f),
-//			glm::vec3(1.f)
-//		)
-//	);
-//
-//	meshes.push_back(
-//		new Mesh(
-//			&Quad(),
-//			glm::vec3(0.f, 0.f, 0.f),
-//			glm::vec3(0.f),
-//			glm::vec3(0.f),
-//			glm::vec3(1.f)
-//		)
-//	);
-//
-//	meshes2.push_back(
-//		new Mesh(
-//			&Quad(),
-//			glm::vec3(0.f, 0.f, 0.f),
-//			glm::vec3(0.f),
-//			glm::vec3(-90.f, 0.f, 0.f),
-//			glm::vec3(100.f)
-//		)
-//	);
-//
-//	this->models.push_back(new Model(
-//		glm::vec3(0.f),
-//		this->materials[0],
-//		this->textures[TEX_CONTAINER],
-//		this->textures[TEX_CONTAINER_SPECULAR],
-//		meshes
-//	)
-//	);
-//
-//	this->models.push_back(new Model(
-//		glm::vec3(0.f, 1.f, 1.f),
-//		this->materials[0],
-//		this->textures[TEX_PUSHEEN],
-//		this->textures[TEX_PUSHEEN_SPECULAR],
-//		meshes
-//	)
-//	);
-//
-//	this->models.push_back(new Model(
-//		glm::vec3(2.f, 0.f, 2.f),
-//		this->materials[0],
-//		this->textures[TEX_CONTAINER],
-//		this->textures[TEX_CONTAINER_SPECULAR],
-//		meshes
-//	)
-//	);
-//
-//	this->models.push_back(new Model(
-//		glm::vec3(2.f, -5.f, 2.f),
-//		this->materials[0],
-//		this->textures[TEX_CONTAINER],
-//		this->textures[TEX_CONTAINER_SPECULAR],
-//		meshes2
-//	)
-//	);
-//
-//	this->models.push_back(new Model(
-//		glm::vec3(4.f, 0.f, 4.f),
-//		this->materials[0],
-//		this->textures[TEX_CONTAINER],
-//		this->textures[TEX_CONTAINER_SPECULAR],
-//		"OBJFiles/ddh.obj"
-//	)
-//	);
-//
-//	for (auto*& i : meshes)
-//		delete i;
-//
-//	for (auto*& i : meshes2)
-//		delete i;
-//}
 
 void freeMemory()
 {
@@ -221,8 +168,8 @@ void freeMemory()
 	for (size_t i = 0; i < materials.size(); i++)
 		delete materials[i];
 
-	for (size_t i = 0; i < meshes.size(); i++)
-		delete meshes[i];
+	for (auto*& i : models)
+		delete i;
 
 	for (size_t i = 0; i < lights.size(); i++)
 		delete lights[i];
