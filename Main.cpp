@@ -80,18 +80,15 @@ void RenderFunction(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear buffers each frame
 	glEnable(GL_DEPTH_TEST); // Depth Buffer -> if z value < current z value, don't render pixel
 
-	glUseProgram(*shaders[SHADER_CORE_PROGRAM]); // Use Program (Shader)
-
 	// UPDATE UNIFORMS
+	glUseProgram(*shaders[SHADER_CORE_PROGRAM]); // Use Program (Shader)
 	updateUniforms();
-
-	//materials[MAT_1]->sendToShader(*shaders[SHADER_CORE_PROGRAM]);
 
 
 	// DRAW
 	for (auto& i : models)
 	{
-		i->rotate(glm::vec3(0.f, 0.01f, 0.f));
+		//i->rotate(glm::vec3(0.f, 0.01f, 0.f));
 		i->render(*shaders[SHADER_CORE_PROGRAM]);
 	}
 

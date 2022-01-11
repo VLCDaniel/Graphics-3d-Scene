@@ -11,6 +11,7 @@ private:
 	GLuint VAO;
 	GLuint VBO;
 	GLuint EBO;
+	GLuint type; // type of render -> QUAD/TRIANGLE
 
 	glm::vec3 position;
 	glm::vec3 origin;
@@ -83,13 +84,15 @@ public:
 		glm::vec3 position = glm::vec3(0.0f),
 		glm::vec3 origin = glm::vec3(0.0f),
 		glm::vec3 rotation = glm::vec3(0.0f),
-		glm::vec3 scale = glm::vec3(1.0f)
+		glm::vec3 scale = glm::vec3(1.0f),
+		GLuint type = 1
 	)
 	{
 		this->position = position;
 		this->origin = origin;
 		this->rotation = rotation;
 		this->scale = scale;
+		this->type = type;
 
 		this->nrOfVertices = nrOfVertices;
 		this->nrOfIndices = nrOfIndices;
@@ -115,13 +118,15 @@ public:
 		glm::vec3 position = glm::vec3(0.0f),
 		glm::vec3 origin = glm::vec3(0.0f),
 		glm::vec3 rotation = glm::vec3(0.0f),
-		glm::vec3 scale = glm::vec3(1.0f)
+		glm::vec3 scale = glm::vec3(1.0f),
+		GLuint type = 1
 	)
 	{
 		this->position = position;
 		this->origin = origin;
 		this->rotation = rotation;
 		this->scale = scale;
+		this->type = type;
 
 		this->nrOfVertices = primitive->getNrOfVertices();
 		this->nrOfIndices = primitive->getNrOfIndices();
@@ -148,6 +153,7 @@ public:
 		this->origin = obj.origin;
 		this->rotation = obj.rotation;
 		this->scale = obj.scale;
+		this->type = obj.type;
 
 		this->nrOfVertices = obj.nrOfVertices;
 		this->nrOfIndices = obj.nrOfIndices;
@@ -233,11 +239,21 @@ public:
 		glBindVertexArray(this->VAO);
 
 		// DRAW
-		//glPointSize(10.0);
+		glPointSize(10.0);
 		//glDrawArrays(GL_POINTS, 0, this->nrOfVertices);
 
 		if (this->nrOfIndices == 0)
-			glDrawArrays(GL_TRIANGLES, 0, this->nrOfVertices);
+		{
+			if (this->type == 1)
+			{
+				glDrawArrays(GL_QUADS, 0, this->nrOfVertices);
+			}
+			else
+			{
+				glDrawArrays(GL_TRIANGLES, 0, this->nrOfVertices);
+			}
+
+		}
 		else
 			glDrawElements(GL_TRIANGLES, this->nrOfIndices, GL_UNSIGNED_INT, 0);
 

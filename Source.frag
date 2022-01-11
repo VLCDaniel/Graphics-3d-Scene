@@ -77,4 +77,6 @@ void main(void)
 	out_Color =
 	texture(material.diffuseTex, ex_Texture)
 	* (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
+
+//	out_Color = texture(material.diffuseTex, ex_Texture) * (vec4(ambient, 1.f) + vec4(diffuse, 1.f) + vec4(specular, 1.f));
 }

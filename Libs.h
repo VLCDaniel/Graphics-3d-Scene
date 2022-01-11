@@ -26,5 +26,5 @@
 #include "Material.h"
 #include "Primitive.h"
 #include "Mesh.h"
-#include "Model.h"
 #include "OBJLoader.h"
+#include "Model.h"

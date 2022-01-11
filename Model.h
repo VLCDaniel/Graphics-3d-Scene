@@ -36,32 +36,40 @@ public:
 		}
 	}
 
-	////OBJ file loaded model
-	//Model(
-	//	glm::vec3 position,
-	//	Material* material,
-	//	Texture* orTexDif,
-	//	Texture* orTexSpec,
-	//	const char* objFile
-	//)
-	//{
-	//	this->position = position;
-	//	this->material = material;
-	//	this->overrideTextureDiffuse = orTexDif;
-	//	this->overrideTextureSpecular = orTexSpec;
+	// OBJ file loaded model
+	Model(
+		glm::vec3 position,
+		glm::vec3 scale,
+		Material* material,
+		Texture* orTexDif,
+		Texture* orTexSpec,
+		const char* objFile
+	)
+	{
+		this->position = position;
+		this->material = material;
+		this->overrideTextureDiffuse = orTexDif;
+		this->overrideTextureSpecular = orTexSpec;
 
-	//	std::vector<Vertex> mesh = loadOBJ(objFile);
-	//	this->meshes.push_back(new Mesh(mesh.data(), mesh.size(), NULL, 0, glm::vec3(1.f, 0.f, 0.f),
-	//		glm::vec3(0.f),
-	//		glm::vec3(0.f),
-	//		glm::vec3(1.f)));
+		std::pair<std::vector<Vertex>, std::vector<Vertex>> msh = loadOBJ(objFile);
+		std::vector<Vertex> mesh_quad = msh.first;
+		std::vector<Vertex> mesh_triangle = msh.second;
+		this->meshes.push_back(new Mesh(mesh_quad.data(), mesh_quad.size(), NULL, 0, glm::vec3(1.f, 0.f, 0.f),
+			glm::vec3(0.f),
+			glm::vec3(0.f),
+			scale));
 
-	//	for (auto& i : this->meshes)
-	//	{
-	//		i->move(this->position);
-	//		i->setOrigin(this->position);
-	//	}
-	//}
+		this->meshes.push_back(new Mesh(mesh_triangle.data(), mesh_triangle.size(), NULL, 0, glm::vec3(1.f, 0.f, 0.f),
+			glm::vec3(0.f),
+			glm::vec3(0.f),
+			scale, 2));
+
+		for (auto& i : this->meshes)
+		{
+			i->move(this->position);
+			i->setOrigin(this->position);
+		}
+	}
 
 	~Model()
 	{
@@ -90,11 +98,11 @@ public:
 		// Draw
 		for (auto& i : this->meshes)
 		{
-			//Activate texture for each mesh
+			// Activate texture for each mesh
 			this->overrideTextureDiffuse->bind(0);
 			this->overrideTextureSpecular->bind(1);
 
-			i->render(ProgramId); //Activates shader also
+			i->render(ProgramId); // Activates shader also
 		}
 	}
 };

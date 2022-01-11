@@ -62,13 +62,33 @@ void initTextures()
 	// TEXTURE 1
 	textures.push_back(new Texture("Images/pusheen2.png", GL_TEXTURE_2D));
 	textures.push_back(new Texture("Images/pusheen2_specular.png", GL_TEXTURE_2D));
+
+	// Sofa 4 5
+	textures.push_back(new Texture("Images/sofa.png", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/sofa_specular.png", GL_TEXTURE_2D));
+
+	// Nightstand 6 7
+	textures.push_back(new Texture("Images/nightstand.png", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/nightstand_specular.png", GL_TEXTURE_2D));
+
+	// Table 8 9
+	textures.push_back(new Texture("Images/table.png", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/table_specular.png", GL_TEXTURE_2D));
+
+	// Globe 10 11
+	textures.push_back(new Texture("Images/globe.png", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/globe_specular.png", GL_TEXTURE_2D));
+
+	// Globe 12 13
+	textures.push_back(new Texture("Images/chair.jpg", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/chair_specular.png", GL_TEXTURE_2D));
 }
 
 void initMaterials()
 {
 	materials.push_back(new Material(glm::vec3(0.1f), // ambient light
 		glm::vec3(1.f), // diffuse light
-		glm::vec3(2.f), // specular light
+		glm::vec3(3.5f), // specular light
 		0, // textures
 		1));
 }
@@ -76,6 +96,64 @@ void initMaterials()
 void initModels()
 {
 	std::vector<Mesh*> meshes;
+
+	models.push_back(new Model(
+		glm::vec3(0.2f, 0.f, -0.2f),
+		glm::vec3(1.f),
+		materials[0],
+		textures[4],
+		textures[5],
+		"OBJFiles/Sofa.obj"
+	));
+
+	models.push_back(new Model(
+		glm::vec3(1.2, 0.f, 0.f),
+		glm::vec3(1.0f),
+		materials[0],
+		textures[6],
+		textures[7],
+		"OBJFiles/Nightstand.obj"
+	));
+
+	models.push_back(new Model(
+		glm::vec3(0., 0.f, 1.7f),
+		glm::vec3(0.25f),
+		materials[0],
+		textures[8],
+		textures[9],
+		"OBJFiles/Table.obj"
+	));
+
+	models.push_back(new Model(
+		glm::vec3(0., 0.55f, 1.7f),
+		glm::vec3(0.02f),
+		materials[0],
+		textures[10],
+		textures[11],
+		"OBJFiles/Globe.obj"
+	));
+
+	models.push_back(new Model(
+		glm::vec3(-0.2, 0.f, 2.7f),
+		glm::vec3(1.f),
+		materials[0],
+		textures[12],
+		textures[13],
+		"OBJFiles/Chair.obj"
+	));
+	models[models.size() - 1]->rotate(glm::vec3(0.f, 90.f, 0.f));
+
+	models.push_back(new Model(
+		glm::vec3(2.2, 0.f, 0.7f),
+		glm::vec3(1.f),
+		materials[0],
+		textures[12],
+		textures[13],
+		"OBJFiles/Chair.obj"
+	));
+
+	models[models.size() - 1]->rotate(glm::vec3(0.f, 270.f, 0.f));
+
 
 	//Triangle tempTriangle = Triangle();
 	//meshes.push_back(new Mesh(&tempTriangle,
@@ -85,13 +163,13 @@ void initModels()
 	//	glm::vec3(1.0f))
 	//);
 
-	Pyramid tempPyramid = Pyramid();
-	meshes.push_back(new Mesh(&tempPyramid,
-		glm::vec3(0.0f),
-		glm::vec3(0.0f),
-		glm::vec3(0.0f),
-		glm::vec3(1.0f))
-	);
+	//Pyramid tempPyramid = Pyramid();
+	//meshes.push_back(new Mesh(&tempPyramid,
+	//	glm::vec3(0.0f),
+	//	glm::vec3(0.0f),
+	//	glm::vec3(0.0f),
+	//	glm::vec3(1.0f))
+	//);
 
 	//Cube tempCube = Cube();
 	//meshes.push_back(new Mesh(&tempCube,
@@ -101,29 +179,29 @@ void initModels()
 	//	glm::vec3(1.0f))
 	//);
 
-	models.push_back(new Model(
-		glm::vec3(0.f),
-		materials[0],
-		textures[TEX_CONTAINER],
-		textures[TEX_CONTAINER_SPECULAR],
-		meshes
-	));
+	//models.push_back(new Model(
+	//	glm::vec3(0.f),
+	//	materials[0],
+	//	textures[TEX_CONTAINER],
+	//	textures[TEX_CONTAINER_SPECULAR],
+	//	meshes
+	//));
 
-	Quad tempQuad = Quad();
-	meshes.push_back(new Mesh(&tempQuad,
-		glm::vec3(0.0f, 0.0f, 0.7f),
-		glm::vec3(0.0f),
-		glm::vec3(0.0f),
-		glm::vec3(1.0f))
-	);
+	//Quad tempQuad = Quad();
+	//meshes.push_back(new Mesh(&tempQuad,
+	//	glm::vec3(0.0f, 0.0f, 0.7f),
+	//	glm::vec3(0.0f),
+	//	glm::vec3(0.0f),
+	//	glm::vec3(1.0f))
+	//);
 
-	models.push_back(new Model(
-		glm::vec3(1.5f, 0.f, 0.f),
-		materials[0],
-		textures[TEX_PUSHEEN],
-		textures[TEX_PUSHEEN_SPECULAR],
-		meshes
-	));
+	//models.push_back(new Model(
+	//	glm::vec3(1.5f, 0.f, 0.f),
+	//	materials[0],
+	//	textures[TEX_PUSHEEN],
+	//	textures[TEX_PUSHEEN_SPECULAR],
+	//	meshes
+	//));
 
 	for (auto*& i : meshes)
 		delete i;
