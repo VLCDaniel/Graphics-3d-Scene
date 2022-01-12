@@ -27,7 +27,7 @@ uniform vec3 cameraPos;
 
 // Local Variables
 vec3 lightDir; // normalised direction from the light source to the normal
-vec3 norm;	   // normal 
+vec3 norm = normalize(texture(material.specularTex, ex_Texture).rgb * 2.0 - 1.0);	   // normal 
 
 // Functions
 vec3 calculateAmbient()
@@ -52,8 +52,8 @@ vec3 calculateSpecular()
 	vec3 reflectDir = reflect(-lightDir, norm); // reflect vector along the normal axis
 
 	// specular component, the higher the power, the higher the shininess value
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35);
-	return (specularStrength * spec * material.specular * texture(material.specularTex, ex_Texture).rgb);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 135);
+	return (specularStrength * spec * material.specular * texture(material.specularTex, ex_Texture).xyz);
 }
 
 void main(void)

@@ -79,16 +79,24 @@ void initTextures()
 	textures.push_back(new Texture("Images/globe.png", GL_TEXTURE_2D));
 	textures.push_back(new Texture("Images/globe_specular.png", GL_TEXTURE_2D));
 
-	// Globe 12 13
+	// Chair 12 13
 	textures.push_back(new Texture("Images/chair.jpg", GL_TEXTURE_2D));
 	textures.push_back(new Texture("Images/chair_specular.png", GL_TEXTURE_2D));
+
+	// Floor 14 15
+	textures.push_back(new Texture("Images/floor.jpg", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/floor_specular.png", GL_TEXTURE_2D));
+
+	// Lamp 16 17
+	textures.push_back(new Texture("Images/lamp.png", GL_TEXTURE_2D));
+	textures.push_back(new Texture("Images/lamp_specular.png", GL_TEXTURE_2D));
 }
 
 void initMaterials()
 {
 	materials.push_back(new Material(glm::vec3(0.1f), // ambient light
 		glm::vec3(1.f), // diffuse light
-		glm::vec3(3.5f), // specular light
+		glm::vec3(2.5f, 0.f, 0.f), // specular light
 		0, // textures
 		1));
 }
@@ -154,54 +162,72 @@ void initModels()
 
 	models[models.size() - 1]->rotate(glm::vec3(0.f, 270.f, 0.f));
 
+	models.push_back(new Model(
+		glm::vec3(0.f, -0.12f, 0.f),
+		glm::vec3(0.01f),
+		materials[0],
+		textures[14],
+		textures[15],
+		"OBJFiles/Floor.obj"
+	));
 
-	//Triangle tempTriangle = Triangle();
-	//meshes.push_back(new Mesh(&tempTriangle,
-	//	glm::vec3(0.0f),
-	//  glm::vec3(0.0f),
-	//	glm::vec3(0.0f),
-	//	glm::vec3(1.0f))
-	//);
+	models.push_back(new Model(
+		glm::vec3(0.7, 0.55f, 1.7f),
+		glm::vec3(1.0f),
+		materials[0],
+		textures[16],
+		textures[17],
+		"OBJFiles/Lamp.obj"
+	));
+	
+	/*
+	Triangle tempTriangle = Triangle();
+	meshes.push_back(new Mesh(&tempTriangle,
+		glm::vec3(0.0f),
+	  glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f))
+	);
 
-	//Pyramid tempPyramid = Pyramid();
-	//meshes.push_back(new Mesh(&tempPyramid,
-	//	glm::vec3(0.0f),
-	//	glm::vec3(0.0f),
-	//	glm::vec3(0.0f),
-	//	glm::vec3(1.0f))
-	//);
+	Pyramid tempPyramid = Pyramid();
+	meshes.push_back(new Mesh(&tempPyramid,
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f))
+	);
 
-	//Cube tempCube = Cube();
-	//meshes.push_back(new Mesh(&tempCube,
-	//	glm::vec3(0.0f),
-	//  glm::vec3(0.0f),
-	//	glm::vec3(0.0f),
-	//	glm::vec3(1.0f))
-	//);
+	Cube tempCube = Cube();
+	meshes.push_back(new Mesh(&tempCube,
+		glm::vec3(0.0f),
+	  glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f))
+	);
 
-	//models.push_back(new Model(
-	//	glm::vec3(0.f),
-	//	materials[0],
-	//	textures[TEX_CONTAINER],
-	//	textures[TEX_CONTAINER_SPECULAR],
-	//	meshes
-	//));
+	models.push_back(new Model(
+		glm::vec3(0.f),
+		materials[0],
+		textures[TEX_CONTAINER],
+		textures[TEX_CONTAINER_SPECULAR],
+		meshes
+	));
 
-	//Quad tempQuad = Quad();
-	//meshes.push_back(new Mesh(&tempQuad,
-	//	glm::vec3(0.0f, 0.0f, 0.7f),
-	//	glm::vec3(0.0f),
-	//	glm::vec3(0.0f),
-	//	glm::vec3(1.0f))
-	//);
+	Quad tempQuad = Quad();
+	meshes.push_back(new Mesh(&tempQuad,
+		glm::vec3(0.0f, 0.0f, 0.7f),
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f))
+	);
 
-	//models.push_back(new Model(
-	//	glm::vec3(1.5f, 0.f, 0.f),
-	//	materials[0],
-	//	textures[TEX_PUSHEEN],
-	//	textures[TEX_PUSHEEN_SPECULAR],
-	//	meshes
-	//));
+	models.push_back(new Model(
+		glm::vec3(1.5f, 0.f, 0.f),
+		materials[0],
+		textures[TEX_PUSHEEN],
+		textures[TEX_PUSHEEN_SPECULAR],
+		meshes
+	)); */
 
 	for (auto*& i : meshes)
 		delete i;
@@ -211,12 +237,14 @@ void initModels()
 
 void initLights()
 {
-	lights.push_back(new glm::vec3(0.f, 0.f, 3.f));
+	//lights.push_back(new glm::vec3(0.f, 0.f, 3.f));
+	lights.push_back(new glm::vec3(1.7f, 0.8f, 1.7f));
 }
 
 void initCamera()
 {
-	camera = new Camera(glm::vec3(0.f, 0.f, 3.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
+	camera = new Camera(glm::vec3(1.f, 1.5f, 4.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
+	//camera = new Camera(glm::vec3(1.7f, 0.7f, 1.7f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
 }
 
 void initUniforms()
@@ -229,7 +257,7 @@ void initUniforms()
 	glUniformMatrix4fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
 
 	// Assign light and camera position
-	//glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "lightPos0"), 1, glm::value_ptr(*lights[0]));
+	glUniform3fv(glGetUniformLocation(*shaders[SHADER_CORE_PROGRAM], "lightPos0"), 1, glm::value_ptr(*lights[0]));
 	
 
 	glUseProgram(0); // Exit shader program
